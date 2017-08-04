@@ -55,10 +55,10 @@ public:
 	{
 
 	}
-	const int get_days_rented() const
+	int get_days_rented() const
 	{ return _days_rented; }
 
-	const movie get_movie() const
+	movie get_movie() const
 	{ return _movie; }
 
 	double get_charge() const;
@@ -116,15 +116,17 @@ public:
 	{
 		_rentals->push_back(r);
 	}
-	const std::string get_name() const
+	std::string get_name() const
 	{
 		return _name;
 	}
-	const double get_total_charge() const;
-	const std::string statement() const;
+	double get_total_charge() const;
+	int get_total_renter_points() const;
+	std::string statement() const;
+	std::string html_statement() const;
 };
 
-const double customer::get_total_charge() const
+double customer::get_total_charge() const
 {
 	double result = 0;
 	for (const auto& entry : *_rentals)
@@ -132,23 +134,48 @@ const double customer::get_total_charge() const
 	return result;
 }
 
-const std::string customer::statement() const
+int customer::get_total_renter_points() const
+{
+	int result = 0;
+	for (const auto& entry : *_rentals)
+		result += entry.get_renter_points();
+	return result;
+}
+
+std::string customer::statement() const
 {
 	double total_amount = 0;
-	int frequent_renter_points = 0;
 	std::string result = "rent statement for: " + _name + "\n";
 
 	for (const auto& entry : *_rentals)
 	{
-		frequent_renter_points += entry.get_renter_points();
 		result += "\t" + entry.get_movie().get_title() + "\t" + std::to_string(entry.get_charge()) + "\n";
 	}
 
 	result += "sum is " + std::to_string(get_total_charge()) + "\n";
-	result += "you gained: " + std::to_string(frequent_renter_points) + " points \n";
+	result += "you gained: " + std::to_string(get_total_renter_points()) + " points \n";
 
 	return result;
 }
+
+std::string customer::html_statement() const
+{
+	std::string result = "<H1>Rent operations for <EM>" + get_name() + "</EM></H1><P>\n";
+
+	for (const auto& entry : *_rentals)
+	{
+		result += entry.get_movie().get_title()
+			+ std::to_string(entry.get_charge()) + "<BR>\n";
+	}
+
+	result += "<P>Total: <EM>"
+		+ std::to_string(get_total_charge()) + "</EM>\n";
+	result += "You gained: <EM>"
+		+ std::to_string(get_total_charge()) + "</EM> points for activity</P>";
+
+	return result;
+}
+
 
 int main()
 {
