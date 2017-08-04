@@ -120,8 +120,17 @@ public:
 	{
 		return _name;
 	}
+	const double get_total_charge() const;
 	const std::string statement() const;
 };
+
+const double customer::get_total_charge() const
+{
+	double result = 0;
+	for (const auto& entry : *_rentals)
+		result += entry.get_charge();
+	return result;
+}
 
 const std::string customer::statement() const
 {
@@ -131,25 +140,30 @@ const std::string customer::statement() const
 
 	for (const auto& entry : *_rentals)
 	{
-		++frequent_renter_points;
-
-		if (entry.get_movie().get_price_code() == movie::NEW_RELEASE
-			&& entry.get_days_rented() > 1)
-		{
-			++frequent_renter_points;
-		}
-
+		frequent_renter_points += entry.get_renter_points();
 		result += "\t" + entry.get_movie().get_title() + "\t" + std::to_string(entry.get_charge()) + "\n";
-		total_amount += entry.get_charge();
 	}
 
-	result += "sum is " + std::to_string(total_amount) + "\n";
-	result += "you gained: " + std::to_string(frequent_renter_points) + "points \n";
+	result += "sum is " + std::to_string(get_total_charge()) + "\n";
+	result += "you gained: " + std::to_string(frequent_renter_points) + " points \n";
 
 	return result;
 }
 
 int main()
 {
+	movie m1("movie 1", 0);
+	movie m2("movie 2", 1);
+	movie m3("movie 3", 2);
 
+	rental r1(m1, 1);
+	rental r2(m2, 2);
+	rental r3(m3, 3);
+
+	customer c("cust name");
+	c.add_rental(r1);
+	c.add_rental(r2);
+	c.add_rental(r3);
+
+	std::cout << c.statement() << std::endl;
 }
