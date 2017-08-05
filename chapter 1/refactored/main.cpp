@@ -8,6 +8,7 @@ class price
 {
 public:
 	virtual int get_price_code() = 0;
+	double get_charge(int days_rented);
 };
 
 class movie
@@ -52,6 +53,21 @@ const int movie::NEW_RELEASE;
 
 double movie::get_charge(int days_rented) const
 {
+	return _price->get_charge(days_rented);
+}
+
+int movie::get_renter_points(int days_rented) const
+{
+	if (get_price_code() == movie::NEW_RELEASE
+		&& days_rented > 1)
+	{
+		return 2;
+	}
+	else return 1;
+}
+
+double price::get_charge(int days_rented)
+{
 	double result = 0;
 
 	switch (get_price_code())
@@ -76,16 +92,6 @@ double movie::get_charge(int days_rented) const
 	}
 
 	return result;
-}
-
-int movie::get_renter_points(int days_rented) const
-{
-	if (get_price_code() == movie::NEW_RELEASE
-		&& days_rented > 1)
-	{
-		return 2;
-	}
-	else return 1;
 }
 
 class children_price : public price
