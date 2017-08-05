@@ -4,6 +4,12 @@
 #include <vector>
 
 
+class price
+{
+public:
+	virtual int get_price_code() = 0;
+};
+
 class movie
 {
 public:
@@ -14,19 +20,17 @@ public:
 public:
 	movie() = default;
 	movie(const std::string& title, const int price_code)
-		:_title(title), _price_code(price_code)
+		:_title(title)
 	{
+		set_price_code(price_code);
 	}
 
 	int get_price_code() const
 	{
-		return _price_code;
+		return _price->get_price_code();
 	}
 
-	void set_price_code(int new_price_code)
-	{
-		_price_code = new_price_code;
-	}
+	void set_price_code(int new_price_code);
 
 	std::string get_title() const
 	{
@@ -38,7 +42,7 @@ public:
 
 private:
 	std::string _title;
-	int _price_code;
+	std::shared_ptr<price> _price;
 };
 
 const int movie::CHILDREN;
@@ -82,6 +86,49 @@ int movie::get_renter_points(int days_rented) const
 		return 2;
 	}
 	else return 1;
+}
+
+class children_price : public price
+{
+public:
+	int get_price_code() override
+	{ return movie::CHILDREN; }
+};
+
+class regular_price : public price
+{
+public:
+	int get_price_code() override
+	{
+		return movie::REGULAR;
+	}
+};
+
+class new_release_price : public price
+{
+public:
+	int get_price_code() override
+	{
+		return movie::NEW_RELEASE;
+	}
+};
+
+void movie::set_price_code(int price_code)
+{
+	switch (price_code)
+	{
+	case REGULAR:
+		_price.reset(new regular_price);
+		break;
+	case CHILDREN:
+		_price.reset(new children_price);
+		break;
+	case NEW_RELEASE:
+		_price.reset(new new_release_price);
+		break;
+	default:
+		throw std::runtime_error("Invalid price code");
+	}
 }
 
 
