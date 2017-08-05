@@ -18,7 +18,7 @@ public:
 	{
 	}
 
-	const  int get_price_code() const
+	int get_price_code() const
 	{
 		return _price_code;
 	}
@@ -28,10 +28,13 @@ public:
 		_price_code = new_price_code;
 	}
 
-	const std::string get_title() const
+	std::string get_title() const
 	{
 		return _title;
 	}
+
+	double get_charge(int days_rented) const;
+	int get_renter_points(int days_rented) const;
 
 private:
 	std::string _title;
@@ -41,6 +44,45 @@ private:
 const int movie::CHILDREN;
 const int movie::REGULAR;
 const int movie::NEW_RELEASE;
+
+
+double movie::get_charge(int days_rented) const
+{
+	double result = 0;
+
+	switch (get_price_code())
+	{
+	case movie::REGULAR:
+		result += 2;
+		if (days_rented > 2)
+		{
+			result += (days_rented - 2) * 15;
+		}
+		break;
+	case movie::NEW_RELEASE:
+		result += days_rented * 3;
+		break;
+	case movie::CHILDREN:
+		result += 15;
+		if (days_rented > 3)
+		{
+			result += (days_rented - 3) * 15;
+		}
+		break;
+	}
+
+	return result;
+}
+
+int movie::get_renter_points(int days_rented) const
+{
+	if (get_price_code() == movie::NEW_RELEASE
+		&& days_rented > 1)
+	{
+		return 2;
+	}
+	else return 1;
+}
 
 
 class rental
@@ -67,40 +109,12 @@ public:
 
 double rental::get_charge() const
 {
-	double result = 0;
-
-	switch (get_movie().get_price_code())
-	{
-	case movie::REGULAR:
-		result += 2;
-		if (get_days_rented() > 2)
-		{
-			result += (get_days_rented() - 2) * 15;
-		}
-		break;
-	case movie::NEW_RELEASE:
-		result += get_days_rented() * 3;
-		break;
-	case movie::CHILDREN:
-		result += 15;
-		if (get_days_rented() > 3)
-		{
-			result += (get_days_rented() - 3) * 15;
-		}
-		break;
-	}
-
-	return result;
+	return _movie.get_charge(_days_rented);
 }
 
 int rental::get_renter_points() const
 {
-	if (get_movie().get_price_code() == movie::NEW_RELEASE
-		&& get_days_rented() > 1)
-	{
-		return 2;
-	}
-	else return 1;
+	return _movie.get_renter_points(_days_rented);
 }
 
 class customer
@@ -112,6 +126,7 @@ public:
 	customer() = default;
 	customer(const std::string& name)
 		:_name(name), _rentals(new std::vector<rental>()) {}
+
 	void add_rental(const rental& r)
 	{
 		_rentals->push_back(r);
@@ -149,7 +164,8 @@ std::string customer::statement() const
 
 	for (const auto& entry : *_rentals)
 	{
-		result += "\t" + entry.get_movie().get_title() + "\t" + std::to_string(entry.get_charge()) + "\n";
+		result += "\t" + entry.get_movie().get_title()
+			+ "\t" + std::to_string(entry.get_charge()) + "\n";
 	}
 
 	result += "sum is " + std::to_string(get_total_charge()) + "\n";
