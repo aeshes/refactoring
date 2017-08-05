@@ -1,2 +1,2 @@
 # refactoring
-'Refactoring' Martin Fowler
+'Refactoring' by Martin Fowler
